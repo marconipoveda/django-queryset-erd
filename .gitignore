@@ -1,0 +1,3 @@
+venv/*
+dist/*
+django_queryset_erd.egg-info/*

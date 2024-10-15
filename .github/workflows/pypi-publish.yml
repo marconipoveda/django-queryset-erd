@@ -1,12 +1,37 @@
-name: Build and Upload to PyPI
+name: Django Queryset ERD CI/CD
 
 on:
   push:
     tags:
       - "v*" # Trigger on push of version tags (e.g., v1.0.0)
+  pull_request:
+    branches: [main] # Trigger on pull requests to main branch
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.10, 3.12]
+        django-version: [4.2, 5.0]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install Django==${{ matrix.django-version }}
+          pip install -e .
+          pip install pytest
+      - name: Run Tests
+        run: pytest
+
   build-and-upload:
+    needs: tests
+    if: startsWith(github.ref, 'ref/tags/v') # Only run if we're pushing a new version tag.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -18,11 +43,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install build twine
-      - name: Run Tests
-        run: |
-          pip install -e .
-          pip install pytest
-          pytest
       - name: Build Package
         run: python -m build
       - name: Upload to PyPI

@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.10, 3.12]
-        django-version: [4.2, 5.0]
+        python-version: ["3.10", "3.12"]
+        django-version: ["4.2", "5.0"]
     steps:
       - uses: actions/checkout@v3
       - name: Setup Python ${{ matrix.python-version }}
@@ -25,12 +25,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install Django==${{ matrix.django-version }}
           pip install -e .
-          pip install pytest
+          pip install pytest pytest-django
       - name: Run Tests
-        run: pytest
+        run: |
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
+          pytest
 
   build-and-upload:
-    needs: tests
+    needs: test
     if: startsWith(github.ref, 'ref/tags/v') # Only run if we're pushing a new version tag.
     runs-on: ubuntu-latest
     steps:

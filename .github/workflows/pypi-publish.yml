@@ -33,7 +33,7 @@ jobs:
 
   build-and-upload:
     needs: test
-    if: startsWith(github.ref, 'ref/tags/v') # Only run if we're pushing a new version tag.
+    if: startsWith(github.ref, 'refs/tags/v') # Only run if we're pushing a new version tag.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
